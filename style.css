@@ -3,6 +3,8 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+
+    overflow-y: hidden;
 }
 
 .info_bar {
