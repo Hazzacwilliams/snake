@@ -5,6 +5,11 @@ body {
     flex-direction: column;
 
     overflow-y: hidden;
+
+    font-family: "Bitcount Prop Single Ink", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 800;
+    font-style: normal;
 }
 
 .info_bar {

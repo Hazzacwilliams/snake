@@ -19,14 +19,15 @@ let snake = [
 let food = [];
 
 let direction = 'right';
+let gamePause = false;
 
 let lastUpdateTime = 0;
 let updateInterval = 200; //200 milliseconds
 
 let gameOver = false;
 
-const maxFood = 3;
-let currentFood = 0;
+let maxFood = 1;
+let currentFood = 1;
 let foodCollision = false;
 
 // -- DRAWING FUNCTIONS --
@@ -63,15 +64,15 @@ function updateSnake(direction) {
     else if (direction === 'left') head.x--;
     else if (direction === 'right') head.x++;
 
-    for(let i = 1; i < snake.length; i++){
-        if(head.x === snake[i].x && head.y === snake[i].y){
+    for (let i = 1; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) {
             gameOver = true;
             alert('Game Over: You ate yourself!');
             return;
         }
     }
 
-    if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight){
+    if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) {
         gameOver = true;
         alert('Game Over: You hit a wall!');
         return;
@@ -120,30 +121,47 @@ function checkForFoodCollision() {
 }
 
 function scoreMultipliers() {
-    if (scoreNum > 100) updateInterval = 150;
-    else if (scoreNum > 200) updateInterval = 100;
-    else if (scoreNum > 300) updateInterval = 50;
+    if (scoreNum >= 100 && scoreNum < 200) {
+        updateInterval = 150;
+        maxFood = 2;
+    }
+    else if (scoreNum >= 200 && scoreNum < 300) {
+        updateInterval = 100;
+        maxFood = 3;
+    }
+    else if (scoreNum >= 300) {
+        updateInterval = 50;
+        maxFood = 4;
+    }
+
+
 }
 
 // -- GAME ENGINE --
 function gameLoop(currentTime) {
+
     requestAnimationFrame(gameLoop);
 
-    score.innerHTML = `${scoreNum}`;
+    if (!gamePause) {
+        
 
-    const deltaTime = currentTime - lastUpdateTime;
-    if (deltaTime > updateInterval) {
-        lastUpdateTime = currentTime;
+        score.innerHTML = `${scoreNum}`;
 
-        updateSnake(direction);
-        spawnFood();
-        checkForFoodCollision();
-        scoreMultipliers();
+        const deltaTime = currentTime - lastUpdateTime;
+        if (deltaTime > updateInterval) {
+            lastUpdateTime = currentTime;
+
+            updateSnake(direction);
+            spawnFood();
+            checkForFoodCollision();
+            scoreMultipliers();
+        }
+
+        clearCanvas();
+        drawSnake();
+        drawFood();
     }
 
-    clearCanvas();
-    drawSnake();
-    drawFood();
 
 }
 
@@ -151,15 +169,19 @@ function gameLoop(currentTime) {
 document.addEventListener("keydown", (e) => {
     const key = e.key;
 
-    if (key === 'ArrowUp' && direction !== 'down') {
+    if ((key === 'ArrowUp' || key === 'w') && direction !== 'down') {
         direction = 'up';
-    } else if (key === 'ArrowDown' && direction !== 'up') {
+        gamePause = false;
+    } else if ((key === 'ArrowDown' || key === 's') && direction !== 'up') {
         direction = 'down';
-    } else if (key === 'ArrowLeft' && direction !== 'right') {
+        gamePause = false;
+    } else if ((key === 'ArrowLeft' || key === 'a') && direction !== 'right') {
         direction = 'left';
-    } else if (key === 'ArrowRight' && direction !== 'left') {
+        gamePause = false;
+    } else if ((key === 'ArrowRight' || key === 'd') && direction !== 'left') {
         direction = 'right';
-    }
+        gamePause = false;
+    } else if (key === ' ') gamePause = !gamePause;
 });
 
 requestAnimationFrame(gameLoop);
