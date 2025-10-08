@@ -6,25 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single+Ink:wght@100..900&family=Exo+2:ital,wght@0,100..900;1,100..900&family=Josefin+Sans&family=Roboto:ital,wght@0,100..900;1,100..900&family=Share+Tech&display=swap"
-        rel="stylesheet">
 </head>
 
 <body>
-    <h1>WELCOME TO SNAKE</h1>
-    <canvas id="canvas">
+    <div class="game">
+        <h1>WELCOME TO SNAKE</h1>
+        <div class="score_bar">
+            <h3>Score:</h3> 
+            <h3 id="score_num"></h3>
+        </div>
+        <div class="score_bar">
+            <h3>Highscore:</h3>
+            <h3 id="highscore_num"></h3>
+        </div>
+        <canvas id="canvas">
 
-    </canvas>
-    <div class="info_bar">
-        <h3>Score: <h3 id="scoreNum"></h3>
-        </h3>
-        <input type="button" value="reset" />
+        </canvas>
+        <div class="info_bar">
+            <button id="reset_game" class="snake_button">RESET</button>
+        </div>
+    </div>
+    <div class="paused_screen">
+        <h1>PAUSED</h1>
     </div>
 
-
+    <div class="welcome_bubble">
+        <h2>Welcome to my rendition of the classic game, SNAKE!</h2>
+        <h3>Controls:</h3>
+        <h4>Movement = WASD or Arrow Keys</h4>
+        <h4>Pause = Spacebar or Escape</h4>
+        <button id="start" class="snake_button">Start Game</button>
+    </div>
 
     <script src="script.js"></script>
 </body>

@@ -1,25 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+
 body {
-    display: flex;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+
+    background-color: #1a1a1a; 
+    color: #FF5555; 
+    min-height: 100vh;
+    margin: 0;
+    position: relative;
+}
+
+body::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+     background: 
+        repeating-linear-gradient(
+            to right, 
+            transparent 0, 
+            transparent 10px,   
+            #990000 10px,       
+            #990000 12px       
+        ),
+        /* --- VERTICAL DASHES --- */
+        repeating-linear-gradient(
+            to bottom, 
+            transparent 0, 
+            transparent 10px,   
+            #990000 10px,      
+            #990000 12px        
+        );
+
+        background-size: 50px 50px;
+        opacity: 0.2; 
+        z-index: -1;
+}
+
+.snake_button {
+    display: inline-block;
+    border-radius: 0;
+    background-color: #ff5555;
+    color: white;
+    box-shadow: 4px 4px 0px #333333;
+    font-family: 'Press Start 2P', monospace;
+    padding: 5px;
+    transition: all 0.05s ease;
+}
+
+.snake_button:hover,
+.snake_button:focus {
+    box-shadow: none;
+    background-color: white;
+    color: #ff5555;
+    cursor: pointer;
+}
+
+.game {
+    display: none;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 
     overflow-y: hidden;
 
-    font-family: "Bitcount Prop Single Ink", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 800;
-    font-style: normal;
+    
 }
 
-.info_bar {
-    width: 500px;
+.welcome_bubble {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    flex-direction: row;
+    flex-direction: column;
+}
+
+.paused_screen {
+    position: absolute;
+    z-index: 100;
+    left: 50vw;
+    top: 50vh;
+    transform: translate(-50%, -50%);
+    border: 2px solid black;
+    padding: 20px;
+    padding-left: 50px;
+    padding-right: 50px;
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+
+    background-color: #ff5555;
+    color: white;
+    box-shadow: 4px 4px 0px #333333;
+
+    animation: pauseFlash 1s infinite alternate;
+}
+
+@keyframes pauseFlash {
+    0%, 50% { background-color: #ff5555; color: white; }
+    50.01%, 100% { background-color: white; color: #ff5555; }
 }
 
 #canvas {
-    border: 1px solid black;
+    border: 4px dashed #ff5555;
+}
+
+.score_bar {
+    width: 25vw;
+    display: flex;
+    justify-content: space-evenly;
+    align-self: center;
+    flex-direction: row;
+}
+
+#reset_game {
+    margin-top: 5px;
 }
