@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-
 body {
     font-family: 'Press Start 2P', monospace;
     font-size: 14px;
@@ -12,6 +11,16 @@ body {
     min-height: 100vh;
     margin: 0;
     position: relative;
+
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    
 }
 
 body::after {
@@ -30,7 +39,6 @@ body::after {
             #990000 10px,       
             #990000 12px       
         ),
-        /* --- VERTICAL DASHES --- */
         repeating-linear-gradient(
             to bottom, 
             transparent 0, 
@@ -71,10 +79,15 @@ body::after {
 
     overflow-y: hidden;
 
-    
+    div {
+        padding-top: 10px;
+    }
 }
 
 .welcome_bubble {
+    height: 100%;
+    width: 100%;
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -118,8 +131,27 @@ body::after {
     justify-content: space-evenly;
     align-self: center;
     flex-direction: row;
+    text-align: center;
 }
 
 #reset_game {
     margin-top: 5px;
+}
+
+
+@media (max-width: 600px) {
+    #canvas {
+        width: 85vw !important;
+        height: 85vw !important;
+    }
+
+    .game {
+        h1 {
+            padding-left: 5vw;
+        }
+    }
+
+    .welcome_bubble {
+        text-align: center;
+    }
 }

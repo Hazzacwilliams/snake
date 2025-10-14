@@ -7,9 +7,6 @@ const welcomeBubble = document.querySelector('.welcome_bubble');
 const start = document.getElementById('start');
 
 const pausedScreen = document.querySelector('.paused_screen');
-
-
-
 const resetGame = document.getElementById('reset_game');
 
 let highscoreNum = document.getElementById('highscore_num');
@@ -41,6 +38,10 @@ let gameOver = false;
 let maxFood = 1;
 let currentFood = 1;
 let foodCollision = false;
+
+let touchStartX = 0;
+let touchStartY = 0;
+let touchDist = 30;
 
 // -- DRAWING FUNCTIONS --
 function clearCanvas() {
@@ -192,8 +193,48 @@ function scoreMultipliers() {
 }
 
 function readHS() {
-    let retrievedHighScore = localStorage.getItem('highscore') ?? 'No Highscore Yet';
+    let retrievedHighScore = localStorage.getItem('highscore') ?? '0';
     return retrievedHighScore;
+}
+
+function handleTouchStart(event) {
+    if (gameStart && !gameOver) {
+        const touch = event.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+    }
+}
+
+function handleTouchEnd(event) {
+    if (!gameStart || gameOver) return;
+
+    const touch = event.changedTouches[0];
+    const touchEndX = touch.clientX;
+    const touchEndY = touch.clientY;
+
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+
+    if(Math.abs(diffX) > Math.abs(diffY)) {
+        if (Math.abs(diffX) > touchDist) {
+            if (diffX > 0 && direction !== 'left'){
+                direction = 'right';
+            } else if (diffX < 0 && direction !== 'right') {
+                direction = 'left';
+            }
+            gamePause = false;
+        }
+    } else {
+        if (Math.abs(diffY) > touchDist) {
+            if (diffY > 0 && direction !== 'up') {
+                direction = 'down';
+            } else if (diffY < 0 && direction !== 'down') {
+                direction = 'up';
+            }
+        }
+        gamePause = false;
+    }
+    event.preventDefault();
 }
 
 // -- GAME ENGINE --
@@ -272,6 +313,9 @@ resetGame.addEventListener("click", (e) => {
     maxFood = 1;
     currentFood = 1;
     foodCollision = false;
-})
+});
+
+canvas.addEventListener('touchstart', handleTouchStart, false);
+canvas.addEventListener('touchend', handleTouchEnd, false);
 
 requestAnimationFrame(gameLoop);
