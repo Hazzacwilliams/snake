@@ -125,7 +125,7 @@ function updateSnake(direction) {
     for (let i = 1; i < snake.length; i++) {
         if (head.x === snake[i].x && head.y === snake[i].y) {
             gameOver = true;
-            if (scoreNum > retrievedHighScore) {
+            if (scoreNum > readHS()) {
                 localStorage.setItem('highscore', scoreNum);
                 gameOverScreen.style.display = 'flex';
             return;
@@ -137,7 +137,7 @@ function updateSnake(direction) {
 
     if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) {
         gameOver = true;
-        if (scoreNum > retrievedHighScore) {
+        if (scoreNum > readHS()) {
             localStorage.setItem('highscore', scoreNum);
             gameOverScreen.style.display = 'flex';
             return;
