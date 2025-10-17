@@ -78,10 +78,6 @@ body::after {
     flex-direction: column;
 
     overflow-y: hidden;
-
-    div {
-        padding-top: 10px;
-    }
 }
 
 .welcome_bubble {
@@ -94,7 +90,7 @@ body::after {
     flex-direction: column;
 }
 
-.paused_screen {
+.popup_screen {
     position: absolute;
     z-index: 100;
     left: 50vw;
@@ -121,6 +117,12 @@ body::after {
     50.01%, 100% { background-color: white; color: #ff5555; }
 }
 
+#gameover_screen {
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
 #canvas {
     border: 4px dashed #ff5555;
 }
@@ -128,7 +130,7 @@ body::after {
 .score_bar {
     width: 25vw;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
     align-self: center;
     flex-direction: row;
     text-align: center;

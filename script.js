@@ -6,8 +6,10 @@ const game = document.querySelector('.game');
 const welcomeBubble = document.querySelector('.welcome_bubble');
 const start = document.getElementById('start');
 
-const pausedScreen = document.querySelector('.paused_screen');
+const pausedScreen = document.getElementById('pause_screen');
 const resetGame = document.getElementById('reset_game');
+const pauseGameButton = document.getElementById('pause_game');
+const gameOverScreen = document.getElementById('gameover_screen');
 
 let highscoreNum = document.getElementById('highscore_num');
 let score = document.getElementById('score_num');
@@ -31,7 +33,7 @@ let gamePause = true;
 let gameStart = false;
 
 let lastUpdateTime = 0;
-let updateInterval = 300; 
+let updateInterval = 300;
 
 let gameOver = false;
 
@@ -64,13 +66,13 @@ function drawSnake() {
 
         if (segment === snake[0]) {
             ctx.fillStyle = 'white';
-            if (direction === 'left'){
+            if (direction === 'left') {
                 ctx.fillRect(x + 4, y + 4, 2, 2);
                 ctx.fillRect(x + 4, y + 14, 2, 2);
-            } else if (direction === 'right'){
+            } else if (direction === 'right') {
                 ctx.fillRect(x + 14, y + 4, 2, 2);
                 ctx.fillRect(x + 14, y + 14, 2, 2);
-            } else if (direction === 'up'){
+            } else if (direction === 'up') {
                 ctx.fillRect(x + 4, y + 3, 2, 2);
                 ctx.fillRect(x + 14, y + 3, 2, 2);
             } else if (direction === 'down') {
@@ -82,7 +84,7 @@ function drawSnake() {
 }
 
 function drawFood() {
-    
+
     food.forEach(item => {
 
         const x = item.x * cellSize;
@@ -124,7 +126,7 @@ function updateSnake(direction) {
         if (head.x === snake[i].x && head.y === snake[i].y) {
             gameOver = true;
             localStorage.setItem('highscore', scoreNum);
-            alert('Game Over: You ate yourself!');
+            gameOverScreen.style.display = 'flex';
             return;
         }
     }
@@ -132,7 +134,7 @@ function updateSnake(direction) {
     if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) {
         gameOver = true;
         localStorage.setItem('highscore', scoreNum);
-        alert('Game Over: You hit a wall!');
+        gameOverScreen.style.display = 'flex';
         return;
     }
 
@@ -215,9 +217,9 @@ function handleTouchEnd(event) {
     const diffX = touchEndX - touchStartX;
     const diffY = touchEndY - touchStartY;
 
-    if(Math.abs(diffX) > Math.abs(diffY)) {
+    if (Math.abs(diffX) > Math.abs(diffY)) {
         if (Math.abs(diffX) > touchDist) {
-            if (diffX > 0 && direction !== 'left'){
+            if (diffX > 0 && direction !== 'left') {
                 direction = 'right';
             } else if (diffX < 0 && direction !== 'right') {
                 direction = 'left';
@@ -308,11 +310,21 @@ resetGame.addEventListener("click", (e) => {
     gamePause = false;
     gameStart = true;
     lastUpdateTime = 0;
-    updateInterval = 300; 
+    updateInterval = 300;
     gameOver = false;
     maxFood = 1;
     currentFood = 1;
     foodCollision = false;
+    gameOverScreen.style.display = 'none';
+});
+
+pauseGameButton.addEventListener("click", (e) => {
+    gamePause = !gamePause;
+    if (gamePause && gameStart) {
+        pausedScreen.style.display = 'flex';
+    } else {
+        pausedScreen.style.display = 'none';
+    }
 });
 
 canvas.addEventListener('touchstart', handleTouchStart, false);

@@ -24,16 +24,21 @@
         </canvas>
         <div class="info_bar">
             <button id="reset_game" class="snake_button">RESET</button>
+            <button id="pause_game" class="snake_button">||</button>
         </div>
     </div>
-    <div class="paused_screen">
+    <div class="popup_screen" id="pause_screen">
         <h1>PAUSED</h1>
+    </div>
+    <div class="popup_screen" id="gameover_screen">
+        <h1>GAME OVER!</h1>
+        <h2>BETTER LUCK NEXT TIME</h2>
     </div>
 
     <div class="welcome_bubble">
         <h2>Welcome to my rendition of the classic game, SNAKE!</h2>
         <h3>Controls:</h3>
-        <h4>Movement = WASD or Arrow Keys</h4>
+        <h4>Movement = WASD, Arrow Keys or Swipe (touchscreen)</h4>
         <h4>Pause = Spacebar or Escape</h4>
         <button id="start" class="snake_button">Start Game</button>
     </div>
