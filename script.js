@@ -127,6 +127,8 @@ function updateSnake(direction) {
             gameOver = true;
             if (scoreNum > retrievedHighScore) {
                 localStorage.setItem('highscore', scoreNum);
+                gameOverScreen.style.display = 'flex';
+            return;
             }
             gameOverScreen.style.display = 'flex';
             return;
@@ -137,6 +139,8 @@ function updateSnake(direction) {
         gameOver = true;
         if (scoreNum > retrievedHighScore) {
             localStorage.setItem('highscore', scoreNum);
+            gameOverScreen.style.display = 'flex';
+            return;
         }
         gameOverScreen.style.display = 'flex';
         return;
