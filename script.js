@@ -45,6 +45,10 @@ let touchStartX = 0;
 let touchStartY = 0;
 let touchDist = 30;
 
+const musicButton = document.getElementById('play_pause');
+const music = document.getElementById('music');
+let isPlaying = false;
+
 // -- DRAWING FUNCTIONS --
 function clearCanvas() {
     ctx.fillStyle = '#003333';
@@ -337,5 +341,18 @@ pauseGameButton.addEventListener("click", (e) => {
 
 canvas.addEventListener('touchstart', handleTouchStart, false);
 canvas.addEventListener('touchend', handleTouchEnd, false);
+
+
+
+musicButton.addEventListener("click", (e) => {
+    if (isPlaying) {
+        music.pause();
+        musicButton.innerHTML = 'Play Music';
+    } else if (!isPlaying) {
+        music.play();
+        musicButton.innerHTML = 'Pause Music';
+    }
+    isPlaying = !isPlaying;
+});
 
 requestAnimationFrame(gameLoop);

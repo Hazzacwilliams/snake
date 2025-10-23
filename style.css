@@ -141,6 +141,7 @@ body::after {
 }
 
 
+
 @media (max-width: 600px) {
     #canvas {
         width: 85vw !important;
