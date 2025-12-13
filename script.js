@@ -1,10 +1,11 @@
-//Get the canvas element and its 2D rendering context
+// -- INSTANCE VARIABLES --
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext("2d");
 
 const game = document.querySelector('.game');
 const welcomeBubble = document.querySelector('.welcome_bubble');
 const start = document.getElementById('start');
+const mediaControls = document.getElementById('media_controls');
 
 const pausedScreen = document.getElementById('pause_screen');
 const resetGame = document.getElementById('reset_game');
@@ -14,6 +15,8 @@ const gameOverScreen = document.getElementById('gameover_screen');
 let highscoreNum = document.getElementById('highscore_num');
 let score = document.getElementById('score_num');
 let scoreNum = 0;
+const HIGHSCORE_KEY = 'highscore';
+highscoreNum.innerHTML = getHighScore();
 
 const cellSize = 20; //Each grid will be 20x20 pixels
 const gridWidth = 20; //20 cells width
@@ -25,10 +28,11 @@ canvas.height = cellSize * gridHeight;
 let snake = [
     { x: 10, y: 10 }
 ];
-
 let food = [];
 
 let direction = 'right';
+let nextDirection = 'right';
+
 let gamePause = true;
 let gameStart = false;
 
@@ -49,44 +53,213 @@ const musicButton = document.getElementById('play_pause');
 const music = document.getElementById('music');
 let isPlaying = false;
 
+const themeToggle = document.getElementById('theme_toggle');
+const themeToggleVal = document.getElementById('theme_toggle-value');
+const body = document.body;
+let THEME_KEY = 'snake-theme';
+let isModernTheme = false;
+
+const eatingSF = document.getElementById('eating_sf');
+const gameoverSF = document.getElementById('gameover_sf');
+
 // -- DRAWING FUNCTIONS --
-function clearCanvas() {
-    ctx.fillStyle = '#003333';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+/**
+ * Helper function to draw rounded rectangles (for modern theme)
+ * @param {CanvasRenderingContext2D} ctx - The canvas context
+ * @param {number} x - X position
+ * @param {number} y - Y position
+ * @param {number} width - Width
+ * @param {number} height - Height
+ * @param {number} radius - Corner radius
+ * @returns {void}
+ */
+function roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
 }
 
+/**
+ * Clears the canvas by filling it with the background color.
+ * @returns {void}
+ */
+function clearCanvas() {
+    if (isModernTheme) {
+        // Modern theme: smooth dark gradient background
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#0f172a');
+        gradient.addColorStop(0.5, '#1e293b');
+        gradient.addColorStop(1, '#0a0e27');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Subtle grid pattern
+        ctx.strokeStyle = 'rgba(99, 102, 241, 0.1)';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i <= gridWidth; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * cellSize, 0);
+            ctx.lineTo(i * cellSize, canvas.height);
+            ctx.stroke();
+        }
+        for (let i = 0; i <= gridHeight; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * cellSize);
+            ctx.lineTo(canvas.width, i * cellSize);
+            ctx.stroke();
+        }
+    } else {
+        // Classic theme: solid dark green with visible grid
+        ctx.fillStyle = '#003333';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Pixelated grid lines
+        ctx.strokeStyle = '#001111';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= gridWidth; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * cellSize, 0);
+            ctx.lineTo(i * cellSize, canvas.height);
+            ctx.stroke();
+        }
+        for (let i = 0; i <= gridHeight; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * cellSize);
+            ctx.lineTo(canvas.width, i * cellSize);
+            ctx.stroke();
+        }
+    }
+}
+
+/**
+ * Draws the snake's segments on the canvas, including the body and head with eyes.
+ * The head's eye placement depends on the current movement direction.
+ * @returns {void}
+ */
 function drawSnake() {
-    snake.forEach(segment => {
+    snake.forEach((segment, index) => {
 
         const x = segment.x * cellSize;
         const y = segment.y * cellSize;
 
-        ctx.fillStyle = '#005500';
-        ctx.fillRect(x, y, cellSize, cellSize);
+        if (isModernTheme) {
+            // Modern theme: smooth rounded snake with gradients and shadows
+            const isHead = segment === snake[0];
+            const cornerRadius = 6;
+            
+            // Create shadow for depth
+            ctx.shadowColor = 'rgba(99, 102, 241, 0.5)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 2;
+            
+            // Main body gradient
+            const gradient = ctx.createLinearGradient(x, y, x + cellSize, y + cellSize);
+            if (isHead) {
+                gradient.addColorStop(0, '#818cf8');
+                gradient.addColorStop(0.5, '#6366f1');
+                gradient.addColorStop(1, '#4f46e5');
+            } else {
+                gradient.addColorStop(0, '#6366f1');
+                gradient.addColorStop(0.5, '#4f46e5');
+                gradient.addColorStop(1, '#4338ca');
+            }
+            
+            ctx.fillStyle = gradient;
+            roundRect(ctx, x, y, cellSize, cellSize, cornerRadius);
+            ctx.fill();
 
-        const inset = 1;
-        ctx.fillStyle = '#33AA33';
-        ctx.fillRect(x + inset, y + inset, cellSize - inset * 2, cellSize - inset * 2);
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
 
-        if (segment === snake[0]) {
-            ctx.fillStyle = 'white';
-            if (direction === 'left') {
-                ctx.fillRect(x + 4, y + 4, 2, 2);
-                ctx.fillRect(x + 4, y + 14, 2, 2);
-            } else if (direction === 'right') {
-                ctx.fillRect(x + 14, y + 4, 2, 2);
-                ctx.fillRect(x + 14, y + 14, 2, 2);
-            } else if (direction === 'up') {
-                ctx.fillRect(x + 4, y + 3, 2, 2);
-                ctx.fillRect(x + 14, y + 3, 2, 2);
-            } else if (direction === 'down') {
-                ctx.fillRect(x + 4, y + 14, 2, 2);
-                ctx.fillRect(x + 14, y + 14, 2, 2);
+            // Inner highlight for 3D effect
+            const inset = 3;
+            const innerGradient = ctx.createLinearGradient(x + inset, y + inset, x + cellSize - inset, y + cellSize - inset);
+            innerGradient.addColorStop(0, 'rgba(139, 92, 246, 0.4)');
+            innerGradient.addColorStop(1, 'rgba(99, 102, 241, 0.2)');
+            ctx.fillStyle = innerGradient;
+            roundRect(ctx, x + inset, y + inset, cellSize - inset * 2, cellSize - inset * 2, cornerRadius - 1);
+            ctx.fill();
+
+            // Eyes for head - rounded
+            if (isHead) {
+                ctx.fillStyle = '#ffffff';
+                const eyeSize = 4;
+                const eyeRadius = 2;
+                if (direction === 'left') {
+                    roundRect(ctx, x + 5, y + 5, eyeSize, eyeSize, eyeRadius);
+                    ctx.fill();
+                    roundRect(ctx, x + 5, y + 11, eyeSize, eyeSize, eyeRadius);
+                    ctx.fill();
+                } else if (direction === 'right') {
+                    roundRect(ctx, x + 11, y + 5, eyeSize, eyeSize, eyeRadius);
+                    ctx.fill();
+                    roundRect(ctx, x + 11, y + 11, eyeSize, eyeSize, eyeRadius);
+                    ctx.fill();
+                } else if (direction === 'up') {
+                    roundRect(ctx, x + 5, y + 4, eyeSize, eyeSize, eyeRadius);
+                    ctx.fill();
+                    roundRect(ctx, x + 11, y + 4, eyeSize, eyeSize, eyeRadius);
+                    ctx.fill();
+                } else if (direction === 'down') {
+                    roundRect(ctx, x + 5, y + 12, eyeSize, eyeSize, eyeRadius);
+                    ctx.fill();
+                    roundRect(ctx, x + 11, y + 12, eyeSize, eyeSize, eyeRadius);
+                    ctx.fill();
+                }
+            }
+        } else {
+            // Classic theme: sharp pixelated green snake
+            ctx.fillStyle = '#005500';
+            ctx.fillRect(x, y, cellSize, cellSize);
+
+            const inset = 1;
+            ctx.fillStyle = '#33AA33';
+            ctx.fillRect(x + inset, y + inset, cellSize - inset * 2, cellSize - inset * 2);
+
+            // Pixelated border effect
+            ctx.fillStyle = '#002200';
+            ctx.fillRect(x, y, cellSize, 1);
+            ctx.fillRect(x, y, 1, cellSize);
+            ctx.fillRect(x + cellSize - 1, y, 1, cellSize);
+            ctx.fillRect(x, y + cellSize - 1, cellSize, 1);
+
+            if (segment === snake[0]) {
+                ctx.fillStyle = 'white';
+                if (direction === 'left') {
+                    ctx.fillRect(x + 4, y + 4, 2, 2);
+                    ctx.fillRect(x + 4, y + 14, 2, 2);
+                } else if (direction === 'right') {
+                    ctx.fillRect(x + 14, y + 4, 2, 2);
+                    ctx.fillRect(x + 14, y + 14, 2, 2);
+                } else if (direction === 'up') {
+                    ctx.fillRect(x + 4, y + 3, 2, 2);
+                    ctx.fillRect(x + 14, y + 3, 2, 2);
+                } else if (direction === 'down') {
+                    ctx.fillRect(x + 4, y + 14, 2, 2);
+                    ctx.fillRect(x + 14, y + 14, 2, 2);
+                }
             }
         }
     })
 }
 
+/**
+ * Draws all currently spawned food items on the canvas as red circles.
+ * @returns {void}
+ */
 function drawFood() {
 
     food.forEach(item => {
@@ -99,25 +272,96 @@ function drawFood() {
 
         const radius = (cellSize / 2) - 3;
 
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius + 1, 0, Math.PI * 2);
-        ctx.fillStyle = '#990000';
-        ctx.fill();
+        if (isModernTheme) {
+            // Modern theme: glowing star-like food with pulsing effect
+            // Outer glow with shadow
+            ctx.shadowColor = 'rgba(251, 191, 36, 0.8)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Main gradient
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius + 3);
+            gradient.addColorStop(0, '#fef3c7');
+            gradient.addColorStop(0.4, '#fbbf24');
+            gradient.addColorStop(0.7, '#f59e0b');
+            gradient.addColorStop(1, '#d97706');
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius + 3, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
 
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        ctx.fillStyle = '#ff5555';
-        ctx.fill();
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+
+            // Inner bright core
+            const innerGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+            innerGradient.addColorStop(0, '#fffbeb');
+            innerGradient.addColorStop(0.5, '#fcd34d');
+            innerGradient.addColorStop(1, '#fbbf24');
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = innerGradient;
+            ctx.fill();
+
+            // Bright highlight
+            ctx.beginPath();
+            ctx.arc(centerX - 3, centerY - 3, radius * 0.5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fill();
+
+            // Sparkle effect - small dots
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.arc(centerX - 6, centerY - 6, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + 6, centerY - 5, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + 5, centerY + 6, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            // Classic theme: sharp pixelated red food (square-like)
+            // Outer dark red square
+            ctx.fillStyle = '#990000';
+            ctx.fillRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
+
+            // Inner bright red square
+            ctx.fillStyle = '#ff5555';
+            ctx.fillRect(x + 4, y + 4, cellSize - 8, cellSize - 8);
+
+            // Pixelated corners for retro look
+            ctx.fillStyle = '#cc0000';
+            ctx.fillRect(x + 2, y + 2, 2, 2);
+            ctx.fillRect(x + cellSize - 4, y + 2, 2, 2);
+            ctx.fillRect(x + 2, y + cellSize - 4, 2, 2);
+            ctx.fillRect(x + cellSize - 4, y + cellSize - 4, 2, 2);
+        }
 
     })
 }
 
 // -- MOVEMENT & LOGIC --
-function updateSnake(direction) {
+
+/**
+ * Updates the snake's position for one game tick.
+ * 1. Commits 'nextDirection' to 'direction'.
+ * 2. Calculates the new head position.
+ * 3. Checks for self-collision and boundary (wall) collision.
+ * 4. Adds the new head and removes the tail if no food was eaten.
+ * @returns {void}
+ */
+function updateSnake() {
 
     if (gameOver) {
         return;
     }
+
+    direction = nextDirection;
 
     const head = { x: snake[0].x, y: snake[0].y };
 
@@ -128,26 +372,12 @@ function updateSnake(direction) {
 
     for (let i = 1; i < snake.length; i++) {
         if (head.x === snake[i].x && head.y === snake[i].y) {
-            gameOver = true;
-            if (scoreNum > readHS()) {
-                localStorage.setItem('highscore', scoreNum);
-                gameOverScreen.style.display = 'flex';
-            return;
-            }
-            gameOverScreen.style.display = 'flex';
-            return;
+            gameOverFunc();
         }
     }
 
     if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) {
-        gameOver = true;
-        if (scoreNum > readHS()) {
-            localStorage.setItem('highscore', scoreNum);
-            gameOverScreen.style.display = 'flex';
-            return;
-        }
-        gameOverScreen.style.display = 'flex';
-        return;
+        gameOverFunc();
     }
 
 
@@ -160,6 +390,11 @@ function updateSnake(direction) {
     foodCollision = false;
 }
 
+/**
+ * Spawns a new food item at a random grid position if the maximum food limit has not been reached.
+ * Note: This function does not explicitly check if the new food overlaps the snake's body.
+ * @returns {void}
+ */
 function spawnFood() {
     if (currentFood <= maxFood) {
         const randPositionX = Math.floor(Math.random() * gridWidth);
@@ -173,6 +408,11 @@ function spawnFood() {
     }
 }
 
+/**
+ * Checks if the snake's head has collided with any food item.
+ * If a collision occurs, the food is removed, the score is incremented, and 'foodCollision' is flagged.
+ * @returns {boolean} True if food was eaten, otherwise false.
+ */
 function checkForFoodCollision() {
     const originalFoodCount = food.length;
 
@@ -182,15 +422,22 @@ function checkForFoodCollision() {
 
     const foodWasEaten = food.length < originalFoodCount;
     if (foodWasEaten) {
+        eatingSF.play();
         currentFood--;
         foodCollision = true;
         spawnFood();
         scoreNum += 10;
+        
     }
 
     return foodWasEaten;
 }
 
+/**
+ * Modifies the game difficulty (speed and max food count) based on the current score.
+ * Updates the global 'updateInterval' and 'maxFood' variables.
+ * @returns {void}
+ */
 function scoreMultipliers() {
     if (scoreNum >= 100 && scoreNum < 200) {
         updateInterval = 225;
@@ -206,11 +453,20 @@ function scoreMultipliers() {
     }
 }
 
-function readHS() {
-    let retrievedHighScore = localStorage.getItem('highscore') ?? '0';
+/**
+ * Retrieves the high score from Local Storage.
+ * @returns {string} The stored high score, or '0' if no score is found.
+ */
+function getHighScore() {
+    let retrievedHighScore = localStorage.getItem(HIGHSCORE_KEY) ?? '0';
     return retrievedHighScore;
 }
 
+/**
+ * Records the starting coordinates of a touch event for later swipe direction calculation.
+ * @param {TouchEvent} event The touchstart event object.
+ * @returns {void}
+ */
 function handleTouchStart(event) {
     if (gameStart && !gameOver) {
         const touch = event.touches[0];
@@ -219,6 +475,12 @@ function handleTouchStart(event) {
     }
 }
 
+/**
+ * Calculates the direction of a swipe gesture and sets the 'nextDirection' accordingly.
+ * Prevents the snake from turning 180 degrees instantly.
+ * @param {TouchEvent} event The touchend event object.
+ * @returns {void}
+ */
 function handleTouchEnd(event) {
     if (!gameStart || gameOver) return;
 
@@ -251,7 +513,48 @@ function handleTouchEnd(event) {
     event.preventDefault();
 }
 
+/**
+ * Toggles the game's paused state and displays/hides the pause screen overlay.
+ * @returns {void}
+ */
+function pauseGame() {
+    gamePause = !gamePause;
+    const pauseText = document.getElementById('pause_game-text');
+    if (gamePause && gameStart) {
+        pausedScreen.style.display = 'flex';
+        if (pauseText) pauseText.innerHTML = 'RESUME';
+    } else {
+        pausedScreen.style.display = 'none';
+        if (pauseText) pauseText.innerHTML = 'PAUSE';
+    }
+}
+
+/**
+ * Handles the game over sequence: sets the 'gameOver' flag, plays a sound,
+ * checks and saves a new high score, and displays the game over screen.
+ * @returns {void}
+ */
+function gameOverFunc() {
+    gameoverSF.play();
+    gameOver = true;
+    if (scoreNum > getHighScore()) {
+        localStorage.setItem(HIGHSCORE_KEY, scoreNum);
+        gameOverScreen.style.display = 'flex';
+        return;
+    }
+    gameOverScreen.style.display = 'flex';
+    return;
+}
+
 // -- GAME ENGINE --
+
+/**
+ * The main game loop driven by requestAnimationFrame.
+ * Updates the score display, checks the time delta, and calls logic/draw functions.
+ * The game logic runs at a fixed 'updateInterval' to ensure consistent speed.
+ * @param {DOMHighResTimeStamp} currentTime The timestamp provided by requestAnimationFrame.
+ * @returns {void}
+ */
 function gameLoop(currentTime) {
 
     requestAnimationFrame(gameLoop);
@@ -259,13 +562,13 @@ function gameLoop(currentTime) {
     if (!gamePause) {
 
         score.innerHTML = `${scoreNum}`;
-        highscoreNum.innerHTML = `${readHS()}`;
+        highscoreNum.innerHTML = `${getHighScore()}`;
 
         const deltaTime = currentTime - lastUpdateTime;
         if (deltaTime > updateInterval) {
             lastUpdateTime = currentTime;
 
-            updateSnake(direction);
+            updateSnake();
             spawnFood();
             checkForFoodCollision();
             scoreMultipliers();
@@ -283,24 +586,19 @@ document.addEventListener("keydown", (e) => {
 
     if (gameStart) {
         if ((key === 'ArrowUp' || key === 'w') && direction !== 'down') {
-            direction = 'up';
+            nextDirection = 'up';
             gamePause = false;
         } else if ((key === 'ArrowDown' || key === 's') && direction !== 'up') {
-            direction = 'down';
+            nextDirection = 'down';
             gamePause = false;
         } else if ((key === 'ArrowLeft' || key === 'a') && direction !== 'right') {
-            direction = 'left';
+            nextDirection = 'left';
             gamePause = false;
         } else if ((key === 'ArrowRight' || key === 'd') && direction !== 'left') {
-            direction = 'right';
+            nextDirection = 'right';
             gamePause = false;
         } else if (key === ' ' || key === 'Escape') {
-            gamePause = !gamePause
-            if (gamePause && gameStart) {
-                pausedScreen.style.display = 'flex';
-            } else {
-                pausedScreen.style.display = 'none';
-            }
+            pauseGame();
         };
     }
 });
@@ -309,6 +607,7 @@ start.addEventListener("click", (e) => {
     welcomeBubble.style.display = 'none';
     gameStart = true;
     game.style.display = 'flex';
+    if (mediaControls) mediaControls.style.display = 'grid';
     setTimeout(() => { gamePause = false }, 1000);
 });
 
@@ -328,31 +627,66 @@ resetGame.addEventListener("click", (e) => {
     currentFood = 1;
     foodCollision = false;
     gameOverScreen.style.display = 'none';
+    pausedScreen.style.display = 'none';
+    const pauseText = document.getElementById('pause_game-text');
+    if (pauseText) pauseText.innerHTML = 'PAUSE';
 });
 
 pauseGameButton.addEventListener("click", (e) => {
-    gamePause = !gamePause;
-    if (gamePause && gameStart) {
-        pausedScreen.style.display = 'flex';
-    } else {
-        pausedScreen.style.display = 'none';
-    }
+    pauseGame();
 });
 
 canvas.addEventListener('touchstart', handleTouchStart, false);
 canvas.addEventListener('touchend', handleTouchEnd, false);
 
-
-
 musicButton.addEventListener("click", (e) => {
+    const musicText = document.getElementById('music_button-text');
     if (isPlaying) {
         music.pause();
-        musicButton.innerHTML = 'Play Music';
-    } else if (!isPlaying) {
+        if (musicText) musicText.innerHTML = 'MUSIC';
+    } else {
         music.play();
-        musicButton.innerHTML = 'Pause Music';
+        if (musicText) musicText.innerHTML = 'MUSIC ✓';
     }
     isPlaying = !isPlaying;
 });
+
+// -- THEME TOGGLE FUNCTIONALITY --
+function initTheme() {
+    let savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme === 'modern') {
+        isModernTheme = true;
+        body.setAttribute('data-theme', 'modern');
+        document.documentElement.setAttribute('data-theme', 'modern');
+        themeToggleVal.innerHTML = 'Modern';
+    } else {
+        isModernTheme = false;
+        body.removeAttribute('data-theme');
+        document.documentElement.removeAttribute('data-theme');
+        themeToggleVal.innerHTML = 'Classic';
+    }
+}
+
+function toggleTheme() {
+    isModernTheme = !isModernTheme;
+    if (isModernTheme) {
+        body.setAttribute('data-theme', 'modern');
+        document.documentElement.setAttribute('data-theme', 'modern');
+        localStorage.setItem(THEME_KEY, 'modern');
+        themeToggleVal.innerHTML = 'MODERN';
+    } else {
+        body.removeAttribute('data-theme');
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem(THEME_KEY, 'classic');
+        themeToggleVal.innerHTML = 'CLASSIC';
+    }
+    clearCanvas();
+    drawSnake();
+    drawFood();
+}
+
+themeToggle.addEventListener('click', toggleTheme);
+
+initTheme();
 
 requestAnimationFrame(gameLoop);

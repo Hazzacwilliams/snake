@@ -1,13 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Bitcount+Prop+Single+Ink:wght@100..900&family=Exo+2:ital,wght@0,100..900;1,100..900&family=Josefin+Sans&family=Roboto:ital,wght@0,100..900;1,100..900&family=Share+Tech&display=swap');
+
+:root {
+
+    /* UI Palette */
+    --colour-primary: #ff5555;
+    --colour-secondary: white;
+    --colour-background: #1a1a1a;
+    --colour-background-lines: #990000;
+    --colour-boxshadow: #333333;
+    --colour-border: black;
+
+    /* Font */
+    --font-family: 'Press Start 2P', monospace;
+}
+
+:root[data-theme="modern"] {
+    --font-family: 'Josefin Sans', sans-serif;
+}
+
 body {
-    font-family: 'Press Start 2P', monospace;
+    font-family: var(--font-family);
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 2px;
 
-    background-color: #1a1a1a; 
-    color: #FF5555; 
+    background-color: var(--colour-background); 
+    color: var(--colour-primary); 
     min-height: 100vh;
     margin: 0;
     position: relative;
@@ -19,8 +39,13 @@ body {
     box-sizing: border-box;
 
     overflow: hidden;
+}
 
-    
+body[data-theme="modern"] {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 16px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 
 body::after {
@@ -36,15 +61,15 @@ body::after {
             to right, 
             transparent 0, 
             transparent 10px,   
-            #990000 10px,       
-            #990000 12px       
+            var(--colour-background-lines) 10px,       
+            var(--colour-background-lines) 12px       
         ),
         repeating-linear-gradient(
             to bottom, 
             transparent 0, 
             transparent 10px,   
-            #990000 10px,      
-            #990000 12px        
+            var(--colour-background-lines) 10px,      
+            var(--colour-background-lines) 12px        
         );
 
         background-size: 50px 50px;
@@ -52,23 +77,48 @@ body::after {
         z-index: -1;
 }
 
+body[data-theme="modern"]::after {
+    background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+    opacity: 1;
+}
+
 .snake_button {
     display: inline-block;
     border-radius: 0;
-    background-color: #ff5555;
-    color: white;
-    box-shadow: 4px 4px 0px #333333;
-    font-family: 'Press Start 2P', monospace;
+    background-color: var(--colour-primary);
+    color: var(--colour-secondary);
+    box-shadow: 4px 4px 0px var(--colour-boxshadow);
+    font-family: var(--font-family);
     padding: 5px;
     transition: all 0.05s ease;
+    outline: none;
 }
 
-.snake_button:hover,
 .snake_button:focus {
+    outline: none;
+}
+
+body[data-theme="modern"] .snake_button {
+    border-radius: 12px;
+    padding: 12px 24px;
+    box-shadow: 0 4px 14px 0 var(--colour-boxshadow);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, var(--colour-primary) 0%, #818cf8 100%);
+}
+
+.snake_button:hover {
     box-shadow: none;
-    background-color: white;
-    color: #ff5555;
+    background-color: var(--colour-secondary);
+    color: var(--colour-primary);
     cursor: pointer;
+}
+
+body[data-theme="modern"] .snake_button:hover {
+    box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #818cf8 0%, var(--colour-primary) 100%);
 }
 
 .game {
@@ -96,7 +146,7 @@ body::after {
     left: 50vw;
     top: 50vh;
     transform: translate(-50%, -50%);
-    border: 2px solid black;
+    border: 2px solid var(--colour-border);
     padding: 20px;
     padding-left: 50px;
     padding-right: 50px;
@@ -105,16 +155,16 @@ body::after {
     justify-content: center;
     align-items: center;
 
-    background-color: #ff5555;
-    color: white;
-    box-shadow: 4px 4px 0px #333333;
+    background-color: var(--colour-primary);
+    color: var(--colour-secondary);
+    box-shadow: 4px 4px 0px var(--colour-boxshadow);
 
     animation: pauseFlash 1s infinite alternate;
 }
 
 @keyframes pauseFlash {
-    0%, 50% { background-color: #ff5555; color: white; }
-    50.01%, 100% { background-color: white; color: #ff5555; }
+    0%, 50% { background-color: var(--colour-primary); color: var(--colour-secondary); }
+    50.01%, 100% { background-color: var(--colour-secondary); color: var(--colour-primary); }
 }
 
 #gameover_screen {
@@ -124,7 +174,13 @@ body::after {
 }
 
 #canvas {
-    border: 4px dashed #ff5555;
+    border: 4px dashed var(--colour-primary);
+}
+
+body[data-theme="modern"] #canvas {
+    border: 3px solid var(--colour-primary);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
 }
 
 .score_bar {
@@ -136,10 +192,86 @@ body::after {
     text-align: center;
 }
 
-#reset_game {
-    margin-top: 5px;
+
+
+/* Media Controls */
+.media_controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(90px, 1fr));
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px;
+    z-index: 1000;
 }
 
+.control_button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    background-color: var(--colour-primary);
+    color: var(--colour-secondary);
+    box-shadow: 4px 4px 0px var(--colour-boxshadow);
+    font-family: var(--font-family);
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    font-size: 10px;
+    width: 100%;
+    min-width: 0;
+    height: 40px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.control_button:focus {
+    outline: none;
+}
+
+body[data-theme="modern"] .control_button {
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 14px 0 var(--colour-boxshadow);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, var(--colour-primary) 0%, #818cf8 100%);
+    font-size: 12px;
+    height: 44px;
+}
+
+.control_button:hover {
+    box-shadow: none;
+    background-color: var(--colour-secondary);
+    color: var(--colour-primary);
+    transform: translate(2px, 2px);
+}
+
+body[data-theme="modern"] .control_button:hover {
+    box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #818cf8 0%, var(--colour-primary) 100%);
+}
+
+#theme_toggle-value,
+#pause_game-text,
+.control_button span {
+    margin: 0;
+    font-size: inherit;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+body[data-theme="modern"] #theme_toggle-value,
+body[data-theme="modern"] #pause_game-text,
+body[data-theme="modern"] #music_button-text,
+body[data-theme="modern"] .control_button span {
+    text-transform: none;
+    letter-spacing: normal;
+}
 
 
 @media (max-width: 600px) {
@@ -156,5 +288,23 @@ body::after {
 
     .welcome_bubble {
         text-align: center;
+    }
+
+    .media_controls {
+        top: 10px;
+        right: 10px;
+        gap: 8px;
+    }
+
+    .control_button {
+        padding: 6px 10px;
+        font-size: 8px;
+        height: 32px;
+    }
+
+    body[data-theme="modern"] .control_button {
+        padding: 10px 14px;
+        font-size: 10px;
+        height: 36px;
     }
 }

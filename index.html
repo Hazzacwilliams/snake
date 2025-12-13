@@ -11,10 +11,30 @@
 
 <body>
     <div>
-        <audio id="music" loop autoplay>
+        <audio id="music" loop>
             <source src="./assets/ES_Pop a Can of That Funky Jam - Peachwood.mp3" type="audio/mpeg">
         </audio>
-        <button id="play_pause" class="snake_button">Play Music</button>
+        <div class="media_controls" id="media_controls" style="display: none;">
+            <button id="play_pause" class="control_button">
+                <span id="music_button-text">MUSIC</span>
+            </button>
+            <button id="theme_toggle" class="control_button">
+                <span id="theme_toggle-value">Classic</span>
+            </button>
+            <button id="pause_game" class="control_button">
+                <span id="pause_game-text">PAUSE</span>
+            </button>
+            <button id="reset_game" class="control_button">
+                <span>RESET</span>
+            </button>
+        </div>
+
+        <audio id="eating_sf">
+            <source src="./assets/eating-sound-effect-36186.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="gameover_sf">
+            <source src="./assets/falled-sound-effect-278635.mp3" type="audio/mpeg">
+        </audio>
     </div>
 
     <div class="game">
@@ -30,10 +50,6 @@
         <canvas id="canvas">
 
         </canvas>
-        <div class="info_bar">
-            <button id="reset_game" class="snake_button">RESET</button>
-            <button id="pause_game" class="snake_button">||</button>
-        </div>
     </div>
     <div class="popup_screen" id="pause_screen">
         <h1>PAUSED</h1>
