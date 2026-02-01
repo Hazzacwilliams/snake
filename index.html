@@ -14,20 +14,28 @@
         <audio id="music" loop>
             <source src="./assets/ES_Pop a Can of That Funky Jam - Peachwood.mp3" type="audio/mpeg">
         </audio>
-        <div class="media_controls" id="media_controls" style="display: none;">
-            <button id="play_pause" class="control_button">
-                <span id="music_button-text">MUSIC</span>
-            </button>
-            <button id="theme_toggle" class="control_button">
-                <span id="theme_toggle-value">Classic</span>
-            </button>
-            <button id="pause_game" class="control_button">
-                <span id="pause_game-text">PAUSE</span>
-            </button>
-            <button id="reset_game" class="control_button">
-                <span>RESET</span>
-            </button>
+        <div>
+            <div class="media_controls-menu">
+                <p class="media_controls-menu-line" id="menu-line1"></p>
+                <p class="media_controls-menu-line" id="menu-line2"></p>
+                <p class="media_controls-menu-line" id="menu-line3"></p>
+            </div>
+            <div class="media_controls" id="media_controls" style="display: none;">
+                <button id="play_pause" class="control_button">
+                    <span id="music_button-text">MUSIC</span>
+                </button>
+                <button id="theme_toggle" class="control_button">
+                    <span id="theme_toggle-value">Classic</span>
+                </button>
+                <button id="pause_game" class="control_button">
+                    <span id="pause_game-text">PAUSE</span>
+                </button>
+                <button id="reset_game" class="control_button">
+                    <span>RESET</span>
+                </button>
+            </div>
         </div>
+
 
         <audio id="eating_sf">
             <source src="./assets/eating-sound-effect-36186.mp3" type="audio/mpeg">
@@ -51,19 +59,23 @@
 
         </canvas>
     </div>
-    <div class="popup_screen" id="pause_screen">
-        <h1>PAUSED</h1>
+
+
+    <div class="popup_screen">
+        <img id="popup_screen-type-icon">
+        <h1 id="popup_screen-type"></h1>
+        <button class="control_button" id="popup_screen-button"></button>
     </div>
-    <div class="popup_screen" id="gameover_screen">
-        <h1>GAME OVER!</h1>
-        <h2>BETTER LUCK NEXT TIME</h2>
+
+    <div class="countdown">
+        <h1 id="countdown_num"></h1>
     </div>
 
     <div class="welcome_bubble">
         <h2>Welcome to my rendition of the classic game, SNAKE!</h2>
         <h3>Controls:</h3>
         <h4>Movement = WASD, Arrow Keys or Swipe (touchscreen)</h4>
-        <h4>Pause = Spacebar or Escape</h4>
+        <h4>Pause = ESC</h4>
         <button id="start" class="snake_button">Start Game</button>
     </div>
 

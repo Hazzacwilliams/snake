@@ -6,11 +6,15 @@ const game = document.querySelector('.game');
 const welcomeBubble = document.querySelector('.welcome_bubble');
 const start = document.getElementById('start');
 const mediaControls = document.getElementById('media_controls');
+const mediaControlsMenu = document.querySelector('.media_controls-menu');
+let mediaMenuOpen = false;
 
-const pausedScreen = document.getElementById('pause_screen');
+
 const resetGame = document.getElementById('reset_game');
 const pauseGameButton = document.getElementById('pause_game');
-const gameOverScreen = document.getElementById('gameover_screen');
+const popupScreen = document.querySelector('.popup_screen');
+const popupScreenBtn = document.getElementById('popup_screen-button');
+const countdownTimer = document.querySelector('.countdown');
 
 let highscoreNum = document.getElementById('highscore_num');
 let score = document.getElementById('score_num');
@@ -101,7 +105,7 @@ function clearCanvas() {
         gradient.addColorStop(1, '#0a0e27');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         // Subtle grid pattern
         ctx.strokeStyle = 'rgba(99, 102, 241, 0.1)';
         ctx.lineWidth = 0.5;
@@ -121,7 +125,7 @@ function clearCanvas() {
         // Classic theme: solid dark green with visible grid
         ctx.fillStyle = '#003333';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         // Pixelated grid lines
         ctx.strokeStyle = '#001111';
         ctx.lineWidth = 1;
@@ -155,13 +159,13 @@ function drawSnake() {
             // Modern theme: smooth rounded snake with gradients and shadows
             const isHead = segment === snake[0];
             const cornerRadius = 6;
-            
+
             // Create shadow for depth
             ctx.shadowColor = 'rgba(99, 102, 241, 0.5)';
             ctx.shadowBlur = 8;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 2;
-            
+
             // Main body gradient
             const gradient = ctx.createLinearGradient(x, y, x + cellSize, y + cellSize);
             if (isHead) {
@@ -173,7 +177,7 @@ function drawSnake() {
                 gradient.addColorStop(0.5, '#4f46e5');
                 gradient.addColorStop(1, '#4338ca');
             }
-            
+
             ctx.fillStyle = gradient;
             roundRect(ctx, x, y, cellSize, cellSize, cornerRadius);
             ctx.fill();
@@ -279,14 +283,14 @@ function drawFood() {
             ctx.shadowBlur = 12;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
-            
+
             // Main gradient
             const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius + 3);
             gradient.addColorStop(0, '#fef3c7');
             gradient.addColorStop(0.4, '#fbbf24');
             gradient.addColorStop(0.7, '#f59e0b');
             gradient.addColorStop(1, '#d97706');
-            
+
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius + 3, 0, Math.PI * 2);
             ctx.fillStyle = gradient;
@@ -301,7 +305,7 @@ function drawFood() {
             innerGradient.addColorStop(0, '#fffbeb');
             innerGradient.addColorStop(0.5, '#fcd34d');
             innerGradient.addColorStop(1, '#fbbf24');
-            
+
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             ctx.fillStyle = innerGradient;
@@ -400,6 +404,15 @@ function spawnFood() {
         const randPositionX = Math.floor(Math.random() * gridWidth);
         const randPositionY = Math.floor(Math.random() * gridHeight);
 
+        const isOnSnake = snake.some(bodyPart => 
+            bodyPart.x === randPositionX && bodyPart.y === randPositionY
+        );
+
+        if(isOnSnake) {
+            spawnFood();
+            return;
+        }
+
         const newFoodLocation = { x: randPositionX, y: randPositionY };
 
         food.push(newFoodLocation);
@@ -427,7 +440,7 @@ function checkForFoodCollision() {
         foodCollision = true;
         spawnFood();
         scoreNum += 10;
-        
+
     }
 
     return foodWasEaten;
@@ -494,18 +507,18 @@ function handleTouchEnd(event) {
     if (Math.abs(diffX) > Math.abs(diffY)) {
         if (Math.abs(diffX) > touchDist) {
             if (diffX > 0 && direction !== 'left') {
-                direction = 'right';
+                nextDirection = 'right';
             } else if (diffX < 0 && direction !== 'right') {
-                direction = 'left';
+                nextDirection = 'left';
             }
             gamePause = false;
         }
     } else {
         if (Math.abs(diffY) > touchDist) {
             if (diffY > 0 && direction !== 'up') {
-                direction = 'down';
+                nextDirection = 'down';
             } else if (diffY < 0 && direction !== 'down') {
-                direction = 'up';
+                nextDirection = 'up';
             }
         }
         gamePause = false;
@@ -518,15 +531,38 @@ function handleTouchEnd(event) {
  * @returns {void}
  */
 function pauseGame() {
-    gamePause = !gamePause;
-    const pauseText = document.getElementById('pause_game-text');
-    if (gamePause && gameStart) {
-        pausedScreen.style.display = 'flex';
-        if (pauseText) pauseText.innerHTML = 'RESUME';
-    } else {
-        pausedScreen.style.display = 'none';
-        if (pauseText) pauseText.innerHTML = 'PAUSE';
+    if (gameStart) {
+        gamePause = !gamePause;
+        const pauseText = document.getElementById('pause_game-text');
+        if (gamePause && gameStart) {
+            popupScreen.style.display = 'flex';
+            document.getElementById('popup_screen-type-icon').src = './assets/pause-play.png';
+            document.getElementById('popup_screen-type').innerHTML = 'GAME PAUSED';
+            popupScreenBtn.innerHTML = 'RESUME';
+            if (pauseText) pauseText.innerHTML = 'RESUME';
+        } else {
+            popupScreen.style.display = 'none';
+            if (mediaMenuOpen) mediaControlsToggle();
+            if (pauseText) pauseText.innerHTML = 'PAUSE';
+        }
     }
+
+}
+
+function countdownFunc() {
+    let count = 3;
+    countdownTimer.style.display = 'flex';
+    countdownTimer.innerHTML = count;
+
+    const timer = setInterval(() => {
+        count--;
+        if (count > 0) {
+            countdownTimer.innerHTML = count;
+        } else {
+            countdownTimer.style.display = 'none';
+            clearInterval(timer);
+        }
+    }, 1000);
 }
 
 /**
@@ -539,11 +575,63 @@ function gameOverFunc() {
     gameOver = true;
     if (scoreNum > getHighScore()) {
         localStorage.setItem(HIGHSCORE_KEY, scoreNum);
-        gameOverScreen.style.display = 'flex';
+        popupScreen.style.display = 'flex';
+        document.getElementById('popup_screen-type-icon').src = './assets/game-over.png';
+        document.getElementById('popup_screen-type').innerHTML = `NEW HIGHSCORE! ${scoreNum}`;
+        popupScreenBtn.innerHTML = 'RESTART';
         return;
     }
-    gameOverScreen.style.display = 'flex';
+    popupScreen.style.display = 'flex';
+    document.getElementById('popup_screen-type-icon').src = './assets/game-over.png';
+    document.getElementById('popup_screen-type').innerHTML = `Score: ${scoreNum}`;
+    popupScreenBtn.innerHTML = 'RESTART';
     return;
+}
+
+// -- UTILITY FUNCTIONS --
+
+/**
+ * A utility function to reset all game values in the event of a game restart
+ * @returns {void}
+ */
+function resetVals() {
+    scoreNum = 0;
+    snake = [
+        { x: 10, y: 10 }
+    ];
+    food = [];
+    direction = 'right';
+    nextDirection = 'right';
+    gamePause = false;
+    gameStart = true;
+    lastUpdateTime = 0;
+    updateInterval = 300;
+    gameOver = false;
+    maxFood = 1;
+    currentFood = 1;
+    foodCollision = false;
+
+    const pauseText = document.getElementById('pause_game-text');
+    if (pauseText) pauseText.innerHTML = 'PAUSE';
+}
+
+function mediaControlsToggle() {
+    mediaMenuOpen = !mediaMenuOpen;
+    if (mediaMenuOpen) {
+        if (mediaControls) mediaControls.style.display = 'grid';
+        document.getElementById('menu-line1').style.transform = 'translateY(5px) rotate(45deg)';
+        document.getElementById('menu-line2').style.display = 'none';
+        document.getElementById('menu-line3').style.transform = 'translateY(-5px) rotate(-45deg)';
+        if (!gamePause && !gameOver) {
+            pauseGame();
+        } 
+
+    } else {
+        mediaControls.style.display = 'none';
+        document.getElementById('menu-line1').style.transform = 'translateY(0px) rotate(0deg)';
+        document.getElementById('menu-line2').style.display = 'flex';
+        document.getElementById('menu-line3').style.transform = 'translateY(0px) rotate(0deg)';
+    }
 }
 
 // -- GAME ENGINE --
@@ -597,8 +685,15 @@ document.addEventListener("keydown", (e) => {
         } else if ((key === 'ArrowRight' || key === 'd') && direction !== 'left') {
             nextDirection = 'right';
             gamePause = false;
-        } else if (key === ' ' || key === 'Escape') {
-            pauseGame();
+        } else if (key === 'Escape') {
+            if (gamePause) {
+                countdownFunc()
+                popupScreen.style.display = 'none';
+                setTimeout(() => { pauseGame() }, 4000);
+            } else {
+                pauseGame();
+            }
+            
         };
     }
 });
@@ -607,34 +702,47 @@ start.addEventListener("click", (e) => {
     welcomeBubble.style.display = 'none';
     gameStart = true;
     game.style.display = 'flex';
-    if (mediaControls) mediaControls.style.display = 'grid';
-    setTimeout(() => { gamePause = false }, 1000);
+    countdownFunc();
+    setTimeout(() => { gamePause = false }, 4000);
+});
+
+mediaControlsMenu.addEventListener("click", (e) => {
+    mediaControlsToggle();
 });
 
 resetGame.addEventListener("click", (e) => {
-    scoreNum = 0
-    snake = [
-        { x: 10, y: 10 }
-    ];
-    food = [];
-    direction = 'right';
-    gamePause = false;
-    gameStart = true;
-    lastUpdateTime = 0;
-    updateInterval = 300;
-    gameOver = false;
-    maxFood = 1;
-    currentFood = 1;
-    foodCollision = false;
-    gameOverScreen.style.display = 'none';
-    pausedScreen.style.display = 'none';
-    const pauseText = document.getElementById('pause_game-text');
-    if (pauseText) pauseText.innerHTML = 'PAUSE';
+    popupScreen.style.display = 'none';
+    if (mediaMenuOpen) mediaControlsToggle();
+    countdownFunc();
+    setTimeout(() => { resetVals(); }, 4000);
 });
 
 pauseGameButton.addEventListener("click", (e) => {
-    pauseGame();
+    if (gamePause) {
+        popupScreen.style.display = 'none';
+        if (mediaMenuOpen) mediaControlsToggle();
+        countdownFunc();
+        setTimeout(() => { pauseGame() }, 4000);
+    } else {
+        pauseGame();
+    }
+
 });
+
+popupScreenBtn.addEventListener("click", (e) => {
+    if (gamePause) {
+        popupScreen.style.display = 'none';
+        if (mediaMenuOpen) mediaControlsToggle();
+        countdownFunc();
+        setTimeout(() => { pauseGame() }, 4000);
+    } else {
+        popupScreen.style.display = 'none';
+        countdownFunc();
+        setTimeout(() => { resetVals() }, 4000);
+
+    }
+
+})
 
 canvas.addEventListener('touchstart', handleTouchStart, false);
 canvas.addEventListener('touchend', handleTouchEnd, false);
@@ -658,12 +766,12 @@ function initTheme() {
         isModernTheme = true;
         body.setAttribute('data-theme', 'modern');
         document.documentElement.setAttribute('data-theme', 'modern');
-        themeToggleVal.innerHTML = 'Modern';
+        themeToggleVal.innerHTML = 'MODERN';
     } else {
         isModernTheme = false;
         body.removeAttribute('data-theme');
         document.documentElement.removeAttribute('data-theme');
-        themeToggleVal.innerHTML = 'Classic';
+        themeToggleVal.innerHTML = 'CLASSIC';
     }
 }
 

@@ -140,32 +140,42 @@ body[data-theme="modern"] .snake_button:hover {
     flex-direction: column;
 }
 
+
+
 .popup_screen {
-    position: absolute;
     z-index: 100;
-    left: 50vw;
-    top: 50vh;
-    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
     border: 2px solid var(--colour-border);
     padding: 20px;
-    padding-left: 50px;
-    padding-right: 50px;
+    box-sizing: border-box;
 
     display: none;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    gap: 20px;
 
     background-color: var(--colour-primary);
     color: var(--colour-secondary);
-    box-shadow: 4px 4px 0px var(--colour-boxshadow);
-
-    animation: pauseFlash 1s infinite alternate;
+    text-align: center;
 }
 
-@keyframes pauseFlash {
-    0%, 50% { background-color: var(--colour-primary); color: var(--colour-secondary); }
-    50.01%, 100% { background-color: var(--colour-secondary); color: var(--colour-primary); }
+#popup_screen-type-icon {
+    width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }
+
+#popup_screen-type {
+    margin: 0;
+    text-align: center;
+}
+
 
 #gameover_screen {
     justify-content: center;
@@ -195,15 +205,43 @@ body[data-theme="modern"] #canvas {
 
 
 /* Media Controls */
-.media_controls {
+
+.media_controls-menu {
     position: fixed;
     top: 20px;
     right: 20px;
+    margin: 2px;     
+    z-index: 1001;
+}
+
+.media_controls-menu-line {
+    width: 20px;
+    height: 4px;
+    background-color: #333;
+    margin: 6px;
+    transition: all 0.4s;
+}
+
+.media_controls-menu:hover {
+    .media_controls-menu-line {
+        background-color: white;
+    }
+    
+}
+
+.media_controls {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     display: grid;
     grid-template-columns: repeat(2, minmax(90px, 1fr));
     grid-template-rows: repeat(2, 1fr);
     gap: 10px;
     z-index: 1000;
+    background-color: white;
+    padding: 50px;
+    border-radius: 10px;
 }
 
 .control_button {
@@ -253,6 +291,14 @@ body[data-theme="modern"] .control_button:hover {
     box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
     transform: translateY(-2px);
     background: linear-gradient(135deg, #818cf8 0%, var(--colour-primary) 100%);
+}
+
+.countdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: x-large;
 }
 
 #theme_toggle-value,
